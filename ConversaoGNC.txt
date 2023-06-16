@@ -1,0 +1,74 @@
+#include <stdio.h> 
+#include <string.h> 
+#define MAX_RULES 100
+ typedef struct { 
+char left;
+ char right[10]; 
+} ProductionRule;
+ 
+void addProductionRule(ProductionRule rules[], int* ruleCount, char left, const char* right) { rules[*ruleCount].left = left;
+ strcpy(rules[*ruleCount].right, right); 
+(*ruleCount)++; 
+}
+ 
+int isTerminal(char symbol) { 
+return symbol >= 'a' && symbol <= 'z'; 
+}
+ 
+void convertToGreibach(ProductionRule rules[], int ruleCount) { for (int i = 0; i < ruleCount; i++) { 
+// Remover recursão à esquerda 
+for (int j = 0; j < i; j++) { 
+if (rules[i].left == rules[j].left) { 
+char newLeft = 'X'; 
+char newRight[10]; 
+strcpy(newRight, rules[i].right);
+ strcat(newRight, &newLeft); 
+addProductionRule(rules, &ruleCount, newLeft, newRight); strcpy(rules[i].right, &rules[i].right[1]); 
+ 
+} 
+ 
+}
+ 
+if (strlen(rules[i].right) > 1 && !isTerminal(rules[i].right[0])) { 
+char newLeft = 'Y'; 
+char newRight[10]; 
+newRight[0] = rules[i].right[0]; 
+newRight[1] = newLeft; 
+newRight[2] = '\0'; 
+addProductionRule(rules, &ruleCount, newLeft, &rules[i].right[1]); strcpy(rules[i].right, newRight);
+ }
+ 
+if (strcmp(rules[i].right, "λ") == 0) { 
+strcpy(rules[i].right, ""); 
+}
+ }
+ }
+ 
+void printProductionRules(ProductionRule rules[], int ruleCount) { 
+for (int i = 0; i < ruleCount; i++) { 
+printf("%c -> %s\n", rules[i].left, rules[i].right); 
+}
+ }
+ 
+int main() { 
+ProductionRule rules[MAX_RULES]; 
+int ruleCount = 0; 
+ 
+addProductionRule(rules, &ruleCount, 'S', "AB");
+addProductionRule(rules, &ruleCount, 'S', "SCB"); 
+addProductionRule(rules, &ruleCount, 'A', "aA"); 
+addProductionRule(rules, &ruleCount, 'A', "C"); 
+addProductionRule(rules, &ruleCount, 'B', "bB"); 
+addProductionRule(rules, &ruleCount, 'B', "b");
+addProductionRule(rules, &ruleCount, 'C', "cC");
+addProductionRule(rules, &ruleCount, 'C', "λ"); 
+ 
+printf("Regras de producao antes da conversao:\n"); printProductionRules(rules, ruleCount); 
+printf("\n"); 
+ 
+convertToGreibach(rules, ruleCount);
+ printf("Regras de producao apos a conversao:\n"); printProductionRules(rules, ruleCount);
+ 
+ return 0; 
+ 
+}
